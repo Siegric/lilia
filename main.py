@@ -58,4 +58,4 @@ class Lilia(discord.Client):
 
 
 client = Lilia()
-client.run(token)
+client.run('NjcyMzE5MTU4NTE5ODU3MTUy.XjJwAg.QymGg8DZv05zEjgDJKp4-k72CSc')
