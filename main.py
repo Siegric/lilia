@@ -1,6 +1,7 @@
 from transformers import AutoModelForCausalLM, AutoTokenizer
 import torch
 import discord
+import asyncio
 tokenizer = AutoTokenizer.from_pretrained("microsoft/DialoGPT-medium")
 model = AutoModelForCausalLM.from_pretrained("microsoft/DialoGPT-medium")
 chat_history = []
@@ -39,6 +40,7 @@ class Lilia(discord.Client):
                               pad_token_id=tokenizer.eos_token_id
                           )
                           output = tokenizer.decode(chat_history_ids[:, bot_input_ids.shape[-1]:][0], skip_special_tokens=True)
+                          await asyncio.sleep(0)
                       except:
                           bot_input_ids = torch.cat([input_ids], dim=-1)
                           chat_history_ids = model.generate(
@@ -51,6 +53,7 @@ class Lilia(discord.Client):
                               pad_token_id=tokenizer.eos_token_id
                           )
                           output = tokenizer.decode(chat_history_ids[:, bot_input_ids.shape[-1]:][0], skip_special_tokens=True)
+                          await asyncio.sleep(0)
                       await message.channel.send(str(output))
 
 
