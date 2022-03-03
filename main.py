@@ -10,14 +10,14 @@ tokenizer = AutoTokenizer.from_pretrained("microsoft/DialoGPT-medium")
 model = AutoModelForCausalLM.from_pretrained("microsoft/DialoGPT-medium")
 translator = Translator()
 chat_history = []
-admins = ['Siegric#9286', 'lllllll#0997']
+admins = ['special', 'Siegric#9286', 'lllllll#0997']
 
 
 #Saves chat history as a text file in chronological order
 def save_chat_history(user):
     if str(user) in admins:
         archive = True
-        with open("history.txt", "w") as file:
+        with open("history.txt", "w", encoding='utf-8') as file:
             for i in chat_history:
                 file.write(str(i) + '\n')
         return archive
@@ -54,7 +54,7 @@ class Lilia(discord.Client):
         ready = ('Logged on as {0}!'.format(self.user))  #Returns a message in the console when bot is online
         print(ready)
         chat_history.append(ready)
-        save_chat_history('Siegric#9286')
+        save_chat_history('special')
         await client.change_presence(activity=discord.Game(name="Chinese Spyware"))
 
     async def on_message(self, message):
