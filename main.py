@@ -2,13 +2,13 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 import torch
 import discord
 import asyncio
-#from googletrans import Translator
+from googletrans import Translator
 
 #Loading the models
 #Optionally can swap out "microsoft/DialoGPT-medium" for "microsoft/DialoGPT-large" for better accuracy
 tokenizer = AutoTokenizer.from_pretrained("microsoft/DialoGPT-medium")
 model = AutoModelForCausalLM.from_pretrained("microsoft/DialoGPT-medium")
-#translator = Translator()
+translator = Translator()
 chat_history = []
 admins = ['Siegric#9286', 'lllllll#0997']
 
@@ -25,13 +25,14 @@ def save_chat_history(user):
         archive = False
         return archive
 
-#def translate(i):
-    #result = translator.translate(i)
-    #if result.src == 'en':
-        #return i
-    #else:
-        #i = result.text
-        #return i
+
+def translate(i):
+    result = translator.translate(str(i))
+    if result.src == 'en':
+        return i
+    else:
+        i = result.text
+        return i
 
 
 def model_generate(bot_input_ids):
@@ -62,6 +63,7 @@ class Lilia(discord.Client):
         if client.user.mentioned_in(message):
               i = (str(message.content)).lower()
               i = i.replace("<@!672319158519857152> ", "")
+              i = translate(i)
               input_ids = tokenizer.encode(i + tokenizer.eos_token, return_tensors="pt")
               if i == "save":  #Calls save_chat_history function to save chat history
                   archive = save_chat_history(message.author)  #takes the message author attribute from the message
