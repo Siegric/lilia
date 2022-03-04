@@ -3,6 +3,7 @@ import torch
 import discord
 import asyncio
 from googletrans import Translator
+import string
 
 #Loading the models
 #Optionally can swap out "microsoft/DialoGPT-medium" for "microsoft/DialoGPT-large" for better accuracy
@@ -25,7 +26,7 @@ def save_chat_history(user):
         archive = False
         return archive
 
-
+#Translates arguments and returns translated argument as well as the source language
 def translate(i):
     result = translator.translate(str(i))
     if result.src == 'en':
@@ -34,6 +35,12 @@ def translate(i):
     else:
         i = result.text
         return [i, result.src]
+
+
+def index_blank(i):
+    for index, character in enumerate(i):
+       if character in string.whitespace:
+            yield index
 
 
 def model_generate(bot_input_ids, src):
@@ -69,26 +76,35 @@ class Lilia(discord.Client):
         if client.user.mentioned_in(message):
               i = (str(message.content)).lower()
               i = i.replace("<@!672319158519857152> ", "")
-              result_list = translate(i)
-              i = result_list[0]
-              input_ids = tokenizer.encode(i + tokenizer.eos_token, return_tensors="pt")
-              if i == "save":  #Calls save_chat_history function to save chat history
-                  archive = save_chat_history(message.author)  #takes the message author attribute from the message
-                  if archive:
-                    await message.channel.send("Chat history archived!")
-                  else:
-                      await message.channel.send("You lack permission!")
+              print(i[:9])
+              if i[:9] == "translate":
+                  try:
+                      index = list(index_blank(i))
+                      result = translator.translate(i[index[0]:index[-1]], dest=i[index[-1]:].replace(" ", ""))
+                      await message.channel.send(result.text)
+                  except:
+                      await message.channel.send("Usage: translate {phrase} {destination language code}")
               else:
-                  async with message.channel.typing():  #Sets activity to typing so user receives some kind of feedback
-                      try:
-                          bot_input_ids = torch.cat([chat_history_ids, input_ids], dim=-1)  #If there are previous messages
-                          output = model_generate(bot_input_ids, result_list[1])
-                          await asyncio.sleep(0)  #Stops typing activity
-                      except:
-                          bot_input_ids = torch.cat([input_ids], dim=-1)  #If there isn't any previous message
-                          output = model_generate(bot_input_ids, result_list[1])
-                          await asyncio.sleep(0)  #Stops the typing activity
-                      await message.channel.send(str(output))  #Returns output to user
+                  result_list = translate(i)
+                  i = result_list[0]
+                  input_ids = tokenizer.encode(i + tokenizer.eos_token, return_tensors="pt")
+                  if i == "save":  #Calls save_chat_history function to save chat history
+                      archive = save_chat_history(message.author)  #takes the message author attribute from the message
+                      if archive:
+                        await message.channel.send("Chat history archived!")
+                      else:
+                          await message.channel.send("You lack permission!")
+                  else:
+                      async with message.channel.typing():  #Sets activity to typing so user receives some kind of feedback
+                          try:
+                              bot_input_ids = torch.cat([chat_history_ids, input_ids], dim=-1)  #If there are previous messages
+                              output = model_generate(bot_input_ids, result_list[1])
+                              await asyncio.sleep(0)  #Stops typing activity
+                          except:
+                              bot_input_ids = torch.cat([input_ids], dim=-1)  #If there isn't any previous message
+                              output = model_generate(bot_input_ids, result_list[1])
+                              await asyncio.sleep(0)  #Stops the typing activity
+                          await message.channel.send(str(output))  #Returns output to user
 
 
 client = Lilia()
