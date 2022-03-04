@@ -29,13 +29,14 @@ def save_chat_history(user):
 def translate(i):
     result = translator.translate(str(i))
     if result.src == 'en':
-        return i
+        return [i, result.src]
+
     else:
         i = result.text
-        return i
+        return [i, result.src]
 
 
-def model_generate(bot_input_ids):
+def model_generate(bot_input_ids, src):
     chat_history_ids = model.generate(
         bot_input_ids,
         max_length=1000,
@@ -46,7 +47,12 @@ def model_generate(bot_input_ids):
         pad_token_id=tokenizer.eos_token_id
     )  #Generation method taken from https://huggingface.co/microsoft/DialoGPT-medium#:~:text=DialoGPT%20is%20a%20SOTA%20large,single%2Dturn%20conversation%20Turing%20test.
     output = tokenizer.decode(chat_history_ids[:, bot_input_ids.shape[-1]:][0], skip_special_tokens=True)
-    return output
+    if src == 'en':
+        return output
+    else:
+        translated_output = translator.translate(output, dest=src)
+        output = translated_output.text
+        return output
 
 
 class Lilia(discord.Client):
@@ -63,7 +69,8 @@ class Lilia(discord.Client):
         if client.user.mentioned_in(message):
               i = (str(message.content)).lower()
               i = i.replace("<@!672319158519857152> ", "")
-              i = translate(i)
+              result_list = translate(i)
+              i = result_list[0]
               input_ids = tokenizer.encode(i + tokenizer.eos_token, return_tensors="pt")
               if i == "save":  #Calls save_chat_history function to save chat history
                   archive = save_chat_history(message.author)  #takes the message author attribute from the message
@@ -75,11 +82,11 @@ class Lilia(discord.Client):
                   async with message.channel.typing():  #Sets activity to typing so user receives some kind of feedback
                       try:
                           bot_input_ids = torch.cat([chat_history_ids, input_ids], dim=-1)  #If there are previous messages
-                          output = model_generate(bot_input_ids)
+                          output = model_generate(bot_input_ids, result_list[1])
                           await asyncio.sleep(0)  #Stops typing activity
                       except:
                           bot_input_ids = torch.cat([input_ids], dim=-1)  #If there isn't any previous message
-                          output = model_generate(bot_input_ids)
+                          output = model_generate(bot_input_ids, result_list[1])
                           await asyncio.sleep(0)  #Stops the typing activity
                       await message.channel.send(str(output))  #Returns output to user
 
