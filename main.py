@@ -11,6 +11,8 @@ tokenizer = AutoTokenizer.from_pretrained("microsoft/DialoGPT-medium")
 model = AutoModelForCausalLM.from_pretrained("microsoft/DialoGPT-medium")
 translator = Translator()
 chat_history = []
+chat_history_ids = []
+counter = 0
 admins = ['special', 'Siegric#9286', 'lllllll#0997']
 
 
@@ -43,17 +45,28 @@ def index_blank(i):
             yield index
 
 
-def model_generate(bot_input_ids, src):
-    chat_history_ids = model.generate(
+#Generation method taken and modified from https://huggingface.co/microsoft/DialoGPT-medium#:~:text=DialoGPT%20is%20a%20SOTA%20large,single%2Dturn%20conversation%20Turing%20test.
+def model_generate(message, src):
+    global chat_history_ids
+    if len(chat_history_ids) >= 2:
+        del chat_history_ids[0]
+    new_user_input_ids = tokenizer.encode(message + tokenizer.eos_token, return_tensors='pt')
+    if chat_history_ids:
+        bot_input_ids = torch.cat([chat_history_ids[-1], new_user_input_ids], dim=-1)
+    else:
+        bot_input_ids = torch.cat([new_user_input_ids], dim=-1)
+    chat_ids = model.generate(
         bot_input_ids,
-        max_length=1000,
+        max_length=100,
         do_sample=True,
-        top_p=0.95,
+        top_p=0.75,
         top_k=0,
-        temperature=0.6,
+        temperature=0.75,
         pad_token_id=tokenizer.eos_token_id
-    )  #Generation method taken from https://huggingface.co/microsoft/DialoGPT-medium#:~:text=DialoGPT%20is%20a%20SOTA%20large,single%2Dturn%20conversation%20Turing%20test.
-    output = tokenizer.decode(chat_history_ids[:, bot_input_ids.shape[-1]:][0], skip_special_tokens=True)
+    )
+    output = tokenizer.decode(chat_ids[:, bot_input_ids.shape[-1]:][0], skip_special_tokens=True)
+    chat_history_ids.append(chat_ids)
+    print(len(chat_history_ids))
     if src == 'en':
         return output
     else:
@@ -76,7 +89,6 @@ class Lilia(discord.Client):
         if client.user.mentioned_in(message):
               i = (str(message.content)).lower()
               i = i.replace("<@!672319158519857152> ", "")
-              print(i[:9])
               if i[:9] == "translate":
                   try:
                       index = list(index_blank(i))
@@ -87,7 +99,6 @@ class Lilia(discord.Client):
               else:
                   result_list = translate(i)
                   i = result_list[0]
-                  input_ids = tokenizer.encode(i + tokenizer.eos_token, return_tensors="pt")
                   if i == "save":  #Calls save_chat_history function to save chat history
                       archive = save_chat_history(message.author)  #takes the message author attribute from the message
                       if archive:
@@ -96,15 +107,10 @@ class Lilia(discord.Client):
                           await message.channel.send("You lack permission!")
                   else:
                       async with message.channel.typing():  #Sets activity to typing so user receives some kind of feedback
-                          try:
-                              bot_input_ids = torch.cat([chat_history_ids, input_ids], dim=-1)  #If there are previous messages
-                              output = model_generate(bot_input_ids, result_list[1])
-                              await asyncio.sleep(0)  #Stops typing activity
-                          except:
-                              bot_input_ids = torch.cat([input_ids], dim=-1)  #If there isn't any previous message
-                              output = model_generate(bot_input_ids, result_list[1])
+                              output = model_generate(i, result_list[-1])
+                              print(chat_history_ids)
                               await asyncio.sleep(0)  #Stops the typing activity
-                          await message.channel.send(str(output))  #Returns output to user
+                              await message.channel.send(str(output))  #Returns output to user
 
 
 client = Lilia()
