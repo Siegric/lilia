@@ -1,0 +1,4 @@
+torch==1.10.2
+discord==1.7.3
+transformers==4.16.2
+googletrans==4.0.0rc1
