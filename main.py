@@ -4,6 +4,8 @@ import discord
 import asyncio
 from googletrans import Translator
 import string
+from quote import quote
+from random_word import RandomWords
 
 #Loading the models
 #Optionally can swap out "microsoft/DialoGPT-medium" for "microsoft/DialoGPT-large" for better accuracy
@@ -44,6 +46,23 @@ def index_blank(i):
             yield index
 
 
+def qotd(*key):
+    try:
+        output = quote(str(key), limit=1)
+        for i in range(len(output)):
+            final_output = (output[i]['quote'])
+            author = (output[i]['author'])
+            print(final_output)
+            return [final_output, author]
+    except:
+        key = RandomWords().get_random_word(hasDictionaryDef=True)
+        output = quote(key, limit=1,)
+        for i in range(len(output)):
+            final_output = (output[i]['quote'])
+            author = (output[i]['author'])
+            return [final_output, author]
+
+
 #Generation method taken and modified from https://huggingface.co/microsoft/DialoGPT-medium#:~:text=DialoGPT%20is%20a%20SOTA%20large,single%2Dturn%20conversation%20Turing%20test.
 def model_generate(message, src):
     new_user_input_ids = tokenizer.encode(message + tokenizer.eos_token, return_tensors='pt')
@@ -79,8 +98,13 @@ class Lilia(discord.Client):
         chat_history.append('Message from {0.author} in {0.channel}: {0.content}'.format(message))  #Saves the chat history into a list
         if client.user.mentioned_in(message):
             i = (str(message.content)).lower()
-            i = i.replace("<@!672319158519857152> ", "")
-            if i[:9] == "translate":
+            i = i.replace("<@!950270628739579904> ", "")
+            if i[:4] == "qotd":
+                key = i[5:]
+                output = qotd(key)
+                await message.channel.send(output[0])
+                await message.channel.send(f"-by {output[-1]}")
+            elif i[:9] == "translate":
                 try:
                     index = list(index_blank(i))
                     result = translator.translate(i[index[0]:index[-1]], dest=i[index[-1]:].replace(" ", ""))
@@ -98,10 +122,10 @@ class Lilia(discord.Client):
                         await message.channel.send("You lack permission!")
                 else:
                     async with message.channel.typing():  #Sets activity to typing so user receives some kind of feedback
-                            output = model_generate(i, result_list[-1])
-                            await asyncio.sleep(0)  #Stops the typing activity
-                            await message.channel.send(str(output))  #Returns output to user
+                        output = model_generate(i, result_list[-1])
+                        await asyncio.sleep(0)  #Stops the typing activity
+                        await message.channel.send(str(output))  #Returns output to user
 
 
 client = Lilia()
-client.run(token)#Token to run bot
+client.run('OTUwMjcwNjI4NzM5NTc5OTA0.YiWefQ.NYPnNLE7YvoOJQSKuSDL_6lCj_w')#Token to run bot
