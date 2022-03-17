@@ -23,23 +23,22 @@
 
 <!-- PROJECT LOGO -->
 <br />
-<div align="center">
-  [alt text](https://github.com/Siegric/lilia/tree/master/icons/icon.png?raw=true)
+<div align="center">![alt text](https://github.com/Siegric/lilia/tree/master/icons/icon.png?raw=true)
   </a>
 
-<h3 align="center">project_title</h3>
+<h3 align="center">Lilia</h3>
 
   <p align="center">
-    project_description
+    Super intelligent maid
     <br />
-    <a href="https://github.com/github_username/repo_name"><strong>Explore the docs »</strong></a>
+    <a href="https://github.com/Siegric/lilia><strong>Explore the docs »</strong></a>
     <br />
     <br />
-    <a href="https://github.com/github_username/repo_name">View Demo</a>
+    <a href="https://github.com/Siegric/lilia">View Demo</a>
     ·
-    <a href="https://github.com/github_username/repo_name/issues">Report Bug</a>
+    <a href="https://github.com/Siegric/lilia">Report Bug</a>
     ·
-    <a href="https://github.com/github_username/repo_name/issues">Request Feature</a>
+    <a href="https://github.com/Siegric/lilia">Request Feature</a>
   </p>
 </div>
 
