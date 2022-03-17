@@ -24,7 +24,7 @@
 <!-- PROJECT LOGO -->
 <br />
 <div align="center">
-  ![alt text](https://github.com/Siegric/lilia/tree/master/icons/icon.png?raw=true)
+  [alt text](https://github.com/Siegric/lilia/tree/master/icons/icon.png?raw=true)
   </a>
 
 <h3 align="center">project_title</h3>
