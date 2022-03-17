@@ -21,8 +21,10 @@
 
 
 
-<!-- PROJECT LOGO -->
-<h3 allign="center">![](https://github.com/Siegric/lilia/tree/master/icons/icon.png?raw=true)</h3>
+<p align="center">
+  <img src="https://user-images.githubusercontent.com/57648341/158872372-09c6981a-a53d-4fac-b6d6-0e99f55b4c5d.png">
+</p>
+
 
 
 <h3 align="center">Lilia</h3>
