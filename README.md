@@ -22,9 +22,8 @@
 
 
 <!-- PROJECT LOGO -->
-<br />
-<div align="center">![alt text](https://github.com/Siegric/lilia/tree/master/icons/icon.png?raw=true)
-  </a>
+![alt text](https://github.com/Siegric/lilia/tree/master/icons/icon.png?raw=true)
+
 
 <h3 align="center">Lilia</h3>
 
