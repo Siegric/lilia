@@ -126,6 +126,7 @@ class Lilia(discord.Client):
         print(ready)
         chat_history.append(ready)
         save_chat_history('special')
+        daily_tasks.start()
         await client.change_presence(activity=discord.Game(name="Chinese Spyware"))
 
     async def on_message(self, message):
